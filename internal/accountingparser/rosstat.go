@@ -9,16 +9,12 @@ import (
 	"strconv"
 )
 
-// YearData содержит данные по кодам строк для года
 type YearData map[string]string
 
-// CompanyData содержит данные по годам для компании
 type CompanyData map[string]YearData
 
-// APIResponse - корневая структура ответа API
 type APIResponse map[string]CompanyData
 
-// AccountingRecord - запись для CSV
 type AccountingRecord struct {
 	CompanyINN string  // ИНН компании
 	Year       string  // Год отчетности
@@ -26,19 +22,16 @@ type AccountingRecord struct {
 	Value      float64 // Значение
 }
 
-// Parser - основной парсер бухгалтерской отчетности
 type Parser struct {
 	records []AccountingRecord
 }
 
-// NewParser создает новый парсер
 func NewParser() *Parser {
 	return &Parser{
 		records: make([]AccountingRecord, 0),
 	}
 }
 
-// ParseJSON парсит JSON body в структуры
 func (p *Parser) ParseJSON(jsonData []byte) error {
 	var apiResponse APIResponse
 
@@ -48,16 +41,11 @@ func (p *Parser) ParseJSON(jsonData []byte) error {
 
 	p.records = make([]AccountingRecord, 0)
 
-	// Проходим по всем компаниям (ИНН)
 	for companyINN, yearsData := range apiResponse {
-		// Проходим по всем годам
 		for year, linesData := range yearsData {
-			// Проходим по всем кодам строк
 			for lineCode, valueStr := range linesData {
-				// Конвертируем строку в число
 				value, err := strconv.ParseFloat(valueStr, 64)
 				if err != nil {
-					// Если не удалось распарсить - пропускаем
 					continue
 				}
 
@@ -75,7 +63,6 @@ func (p *Parser) ParseJSON(jsonData []byte) error {
 	return nil
 }
 
-// ToCSV экспортирует данные в CSV
 func (p *Parser) ToCSV(filename string) error {
 	if len(p.records) == 0 {
 		return fmt.Errorf("нет данных для экспорта")
@@ -87,19 +74,16 @@ func (p *Parser) ToCSV(filename string) error {
 	}
 	defer file.Close()
 
-	// UTF-8 BOM для корректного отображения в Excel
 	file.Write([]byte{0xEF, 0xBB, 0xBF})
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	// Заголовки
 	headers := []string{"ИНН", "Год", "Код строки", "Значение"}
 	if err := writer.Write(headers); err != nil {
 		return fmt.Errorf("ошибка записи заголовков: %w", err)
 	}
 
-	// Данные
 	for _, record := range p.records {
 		row := []string{
 			record.CompanyINN,
@@ -115,7 +99,6 @@ func (p *Parser) ToCSV(filename string) error {
 	return nil
 }
 
-// ToCSVString возвращает CSV как строку
 func (p *Parser) ToCSVString() (string, error) {
 	if len(p.records) == 0 {
 		return "", fmt.Errorf("нет данных для экспорта")
@@ -123,10 +106,8 @@ func (p *Parser) ToCSVString() (string, error) {
 
 	var result string
 
-	// Заголовки
 	result += "ИНН,Год,Код строки,Значение\n"
 
-	// Данные
 	for _, record := range p.records {
 		result += fmt.Sprintf("%s,%s,%s,%.0f\n",
 			record.CompanyINN,
@@ -139,7 +120,6 @@ func (p *Parser) ToCSVString() (string, error) {
 	return result, nil
 }
 
-// Stats - статистика по данным
 type Stats struct {
 	TotalRecords    int
 	Years           []string
@@ -147,7 +127,6 @@ type Stats struct {
 	UniqueCompanies int
 }
 
-// GetStats возвращает статистику
 func (p *Parser) GetStats() Stats {
 	if len(p.records) == 0 {
 		return Stats{}
@@ -163,7 +142,6 @@ func (p *Parser) GetStats() Stats {
 		companiesMap[record.CompanyINN] = true
 	}
 
-	// Конвертируем map в slice
 	years := make([]string, 0, len(yearsMap))
 	for year := range yearsMap {
 		years = append(years, year)
@@ -178,12 +156,10 @@ func (p *Parser) GetStats() Stats {
 	}
 }
 
-// GetRecords возвращает все записи
 func (p *Parser) GetRecords() []AccountingRecord {
 	return p.records
 }
 
-// FilterByYear фильтрует записи по году
 func (p *Parser) FilterByYear(year string) []AccountingRecord {
 	filtered := make([]AccountingRecord, 0)
 	for _, record := range p.records {
@@ -194,7 +170,6 @@ func (p *Parser) FilterByYear(year string) []AccountingRecord {
 	return filtered
 }
 
-// FilterByLineCode фильтрует записи по коду строки
 func (p *Parser) FilterByLineCode(lineCode string) []AccountingRecord {
 	filtered := make([]AccountingRecord, 0)
 	for _, record := range p.records {
@@ -205,7 +180,6 @@ func (p *Parser) FilterByLineCode(lineCode string) []AccountingRecord {
 	return filtered
 }
 
-// GetYearData возвращает все данные за конкретный год для компании
 func (p *Parser) GetYearData(companyINN, year string) map[string]float64 {
 	result := make(map[string]float64)
 	for _, record := range p.records {
@@ -216,7 +190,6 @@ func (p *Parser) GetYearData(companyINN, year string) map[string]float64 {
 	return result
 }
 
-// LineCodeDescriptions - справочник описаний кодов строк
 var LineCodeDescriptions = map[string]string{
 	"1100": "Нематериальные активы",
 	"1110": "Результаты исследований и разработок",
@@ -243,7 +216,6 @@ var LineCodeDescriptions = map[string]string{
 	"2300": "Прибыль (убыток) от продаж",
 	"2400": "Прибыль (убыток) до налогообложения",
 	"2500": "Чистая прибыль (убыток)",
-	// Добавьте другие коды по необходимости
 }
 
 func GetLineCodeDescription(lineCode string) string {
