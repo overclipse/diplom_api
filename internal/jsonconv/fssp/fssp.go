@@ -1,4 +1,4 @@
-package jsonconv
+package fssp
 
 import (
 	"encoding/csv"

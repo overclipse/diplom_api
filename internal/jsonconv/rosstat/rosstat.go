@@ -1,4 +1,4 @@
-package accountingparser
+package rosstat
 
 import (
 	"encoding/csv"

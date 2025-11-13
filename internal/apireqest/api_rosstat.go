@@ -1,12 +1,11 @@
 package apireqest
 
 import (
+	"diplom_api/internal/jsonconv/rosstat"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-
-	"diplom_api/internal/accountingparser"
 )
 
 func Rosstat(url string) {
@@ -22,7 +21,7 @@ func Rosstat(url string) {
 	}
 	fmt.Println(string(body))
 
-	parser := accountingparser.NewParser()
+	parser := rosstat.NewParser()
 
 	if err := parser.ParseJSON(body); err != nil {
 		log.Fatal(err)

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"diplom_api/errdiplom"
-	"diplom_api/internal/jsonconv"
+	"diplom_api/internal/jsonconv/fssp"
 )
 
 func Fsssp(url string) {
@@ -32,7 +32,7 @@ func Fsssp(url string) {
 		fmt.Println(err)
 	}
 	fmt.Println(string(body))
-	parser := jsonconv.NewParser()
+	parser := fssp.NewParser()
 	err = parser.ParseJSON(body)
 	if err != nil {
 		fmt.Errorf("%w: %v", errdiplom.Errcorparse.Error(), err)
