@@ -31,7 +31,7 @@ func Fsssp(url string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(string(body))
+	fmt.Println("fssp значение получено")
 	parser := fssp.NewParser()
 	err = parser.ParseJSON(body)
 	if err != nil {

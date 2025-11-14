@@ -19,7 +19,7 @@ func Rosstat(url string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(body))
+	fmt.Println("значение росстат полученно")
 
 	parser := rosstat.NewParser()
 

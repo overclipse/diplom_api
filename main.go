@@ -1,19 +1,47 @@
 package main
 
 import (
-	"diplom_api/internal/apireqest"
+	"errors"
+	"fmt"
+	"log"
 	"sync"
+
+	"diplom_api/internal/apireqest"
+	"diplom_api/internal/ui"
 )
 
 func main() {
-	wg := sync.WaitGroup{}
-	 finalURL := "https://api.damia.ru/fssp/isps?inn=7712040126&format=1&key=2268a80e1f11a48f8657c69c71f1c00d41be9219"
-	 rosstatURL := "https://api.damia.ru/rs/balance?inn=7712040126&key=67266ba78d7779083310826cc491faf420858d1f"
-	wg.Go(func() {
-		apireqest.Fsssp(finalURL)
-	})
-	wg.Go(func() {
-		apireqest.Rosstat(rosstatURL)
-	})
+	cfg, err := ui.ConfigureRequests()
+	if err != nil {
+		if errors.Is(err, ui.ErrMenuAborted) {
+			fmt.Println("Запросы отменены.")
+			return
+		}
+		log.Fatalf("не удалось запустить меню настроек: %v", err)
+	}
+
+	urls, err := cfg.URLs()
+	if err != nil {
+		log.Fatalf("не удалось собрать URL: %v", err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		apireqest.Fsssp(urls.Fssp)
+	}()
+
+	go func() {
+		defer wg.Done()
+		apireqest.Rosstat(urls.Rosstat)
+	}()
+
+	go func() {
+		defer wg.Done()
+		apireqest.Arb(urls.Arb)
+	}()
+
 	wg.Wait()
 }
