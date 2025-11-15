@@ -26,22 +26,24 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(3)
 
-	go func() {
-		defer wg.Done()
-		apireqest.Fsssp(urls.Fssp)
-	}()
+	if cfg.RunFssp {
+		wg.Go(func() {
+			apireqest.Fsssp(urls.Fssp)
+		})
+	}
 
-	go func() {
-		defer wg.Done()
-		apireqest.Rosstat(urls.Rosstat)
-	}()
+	if cfg.RunRosstat {
+		wg.Go(func() {
+			apireqest.Rosstat(urls.Rosstat)
+		})
+	}
 
-	go func() {
-		defer wg.Done()
-		apireqest.Arb(urls.Arb)
-	}()
+	if cfg.RunArb {
+		wg.Go(func() {
+			apireqest.Arb(urls.Arb)
+		})
+	}
 
 	wg.Wait()
 }

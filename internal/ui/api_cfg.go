@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -8,30 +9,45 @@ import (
 
 // URLs assembles the three requests ready to be executed.
 func (cfg RequestConfig) URLs() (RequestURLs, error) {
-	fsspURL, err := cfg.FsspURL()
-	if err != nil {
-		return RequestURLs{}, err
-	}
-	rosstatURL, err := cfg.RosstatURL()
-	if err != nil {
-		return RequestURLs{}, err
-	}
-	arbURL, err := cfg.ArbURL()
-	if err != nil {
-		return RequestURLs{}, err
+	if !cfg.RunFssp && !cfg.RunRosstat && !cfg.RunArb {
+		return RequestURLs{}, errors.New("не выбрано ни одного источника для сбора")
 	}
 
-	return RequestURLs{
-		Fssp:    fsspURL,
-		Rosstat: rosstatURL,
-		Arb:     arbURL,
-	}, nil
+	var urls RequestURLs
+
+	if cfg.RunFssp {
+		fsspURL, err := cfg.FsspURL()
+		if err != nil {
+			return RequestURLs{}, err
+		}
+		urls.Fssp = fsspURL
+	}
+	if cfg.RunRosstat {
+		rosstatURL, err := cfg.RosstatURL()
+		if err != nil {
+			return RequestURLs{}, err
+		}
+		urls.Rosstat = rosstatURL
+	}
+	if cfg.RunArb {
+		arbURL, err := cfg.ArbURL()
+		if err != nil {
+			return RequestURLs{}, err
+		}
+		urls.Arb = arbURL
+	}
+
+	return urls, nil
 }
 
 // FsspURL returns the final URL for the FSSP request.
 func (cfg RequestConfig) FsspURL() (string, error) {
+	inn := strings.TrimSpace(cfg.Inn)
+	if inn == "" {
+		return "", fmt.Errorf("ИНН не может быть пустым")
+	}
 	return buildURL(cfg.Fssp.Endpoint, map[string]string{
-		"inn":    cfg.Fssp.Inn,
+		"inn":    inn,
 		"format": cfg.Fssp.Format,
 		"key":    cfg.Fssp.Key,
 	})
@@ -39,16 +55,27 @@ func (cfg RequestConfig) FsspURL() (string, error) {
 
 // RosstatURL returns the final URL for the Rosstat request.
 func (cfg RequestConfig) RosstatURL() (string, error) {
+	inn := strings.TrimSpace(cfg.Inn)
+	if inn == "" {
+		return "", fmt.Errorf("ИНН не может быть пустым")
+	}
 	return buildURL(cfg.Rosstat.Endpoint, map[string]string{
-		"inn": cfg.Rosstat.Inn,
+		"inn": inn,
 		"key": cfg.Rosstat.Key,
 	})
 }
 
 // ArbURL returns the final URL for the arbitration request.
 func (cfg RequestConfig) ArbURL() (string, error) {
+	query := strings.TrimSpace(cfg.Arb.Query)
+	if query == "" {
+		query = strings.TrimSpace(cfg.Inn)
+	}
+	if query == "" {
+		return "", fmt.Errorf("поисковый запрос пустой")
+	}
 	return buildURL(cfg.Arb.Endpoint, map[string]string{
-		"q":      cfg.Arb.Query,
+		"q":      query,
 		"format": cfg.Arb.Format,
 		"key":    cfg.Arb.Key,
 	})
