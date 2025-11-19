@@ -1,13 +1,13 @@
 package apireqest
 
 import (
-	"diplom_api/internal/jsonconv/arbitrage"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-)
 
+	"diplom_api/internal/jsonconv/arbitrage"
+)
 
 func Arb(url string) {
 	if url == "" {
@@ -36,8 +36,9 @@ func Arb(url string) {
 		return
 	}
 
-	if err := parser.ToCSV("court_cases.csv"); err != nil {
+	if err := parser.ToCSV("arbitrage.csv"); err != nil {
 		log.Println("ToCSV error:", err)
 		return
 	}
 }
+

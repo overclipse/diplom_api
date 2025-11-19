@@ -13,7 +13,6 @@ const (
 	defaultArbEndpoint     = "https://api.damia.ru/arb/dela"
 )
 
-// ErrMenuAborted is returned when the operator aborts the menu.
 var ErrMenuAborted = errors.New("request configuration canceled by user")
 
 type serviceChoice string
@@ -24,7 +23,6 @@ const (
 	serviceArb     serviceChoice = "arb"
 )
 
-// RequestConfig keeps the parameters the APIs require.
 type RequestConfig struct {
 	Inn        string
 	RunFssp    bool
@@ -66,7 +64,7 @@ type RequestURLs struct {
 
 // DefaultRequestConfig returns a config populated with the previously hardcoded values.
 func DefaultRequestConfig() RequestConfig {
-	defaultInn := "7712040126"
+	defaultInn := "inn"
 	return RequestConfig{
 		Inn:        defaultInn,
 		RunFssp:    true,
