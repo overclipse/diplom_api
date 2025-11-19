@@ -37,7 +37,7 @@ func Fsssp(url string) {
 	if err != nil {
 		fmt.Errorf("%w: %v", errdiplom.Errcorparse.Error(), err)
 	}
-	err = parser.ToCSV("out.csv")
+	err = parser.ToCSV("fssp.csv")
 	if err != nil {
 		fmt.Errorf(errdiplom.Errfilecsv.Error())
 	}
